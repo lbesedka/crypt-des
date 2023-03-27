@@ -310,7 +310,7 @@ bitset<64> Encrypt(bitset<64> text_block, bitset<64> key) {
     }
     new_key = RoundKeyGeneration(key);
     for (int i = 0; i < 16; i++) {
-        left_new = left;
+        left_new = rigth;
         rigth = left ^ FunctionFeistel(new_key, rigth, i);
         left = left_new;
     }
@@ -341,24 +341,61 @@ vector<string> PreparateText(string text) {
     return preparedStrings;
 }
 
+bitset<64> Decrypt(bitset<64> text_block, bitset<64> key) {
+    bitset<32> left;
+    bitset<32> rigth;
+    bitset<32> rigth_new;
+    bitset<48>* new_key;
+    bitset<64> new_block;
+    text_block = IP(text_block);
+    for (int i = 0; i < 32; i++) {
+        left[i] = text_block[i];
+        rigth[i] = text_block[i+32];
+    }
+    new_key = RoundKeyGeneration(key);
+    for (int i = 0; i<16; i++) {
+        rigth_new = left;
+        left = rigth ^ FunctionFeistel(new_key, left, 15-i);
+        rigth = rigth_new;
+    }
+    for (int i = 0; i < 32; i++) {
+        new_block[i+32] = left[i];
+        new_block[i] = rigth[i];
+    }
+    return IP_1(new_block);
+}
 
 int main()
 {
     
     string a = "1234567";
-    string text = "asdfghjklzxcvbnmqwertyuiopaqswdefrgthyjukilocvbnmxzqswfrgtjuf";
+   /* string text = "asdfghjklzxcvbnmqwertyuiopaqswdefrgthyjukilocvbnmxzqswfrgtjuf";
     vector<string> preparatedText = PreparateText(text);
     for (int i = 0; i < preparatedText.size(); i++)
-        cout << preparatedText[i] << endl;
-    bitset<56> s = convertKeytoBit(a);
+        cout << preparatedText[i] << endl;*/
+  /*  bitset<56> s = convertKeytoBit(a);
     
     bitset<64> key = EnlargeKey(s);
     bitset<64> textw;
     textw = convertTexttoBit(text);
     cout << textw << endl; 
     cout << Encrypt(textw, key) << endl;
-    cout << BitsetToChar(Encrypt(textw, key)) << endl; 
+    //cout << BitsetToChar(Encrypt(textw, key)) << endl; */
 
+    bitset<56> s = convertKeytoBit(a);
+    bitset<64> key = EnlargeKey(s);
+    string text = "abcdefde";
+    bitset<64> textw;
+    textw = Encrypt(convertTexttoBit(text), key);
+    string chipher_text = BitsetToChar(textw); 
+    cout << chipher_text << endl; 
+    bitset<64> plain_text = Decrypt(textw, key);
+    string plaintext = BitsetToChar(plain_text);
+    cout << plaintext << endl;
 
+    /*for (int i = 0; i < preparatedText.size(); i++)
+        cout << BitsetToChar(Encrypt(convertTexttoBit(preparatedText[i]), key))<< endl;*/
+    /*for (int i = 0; i < preparatedText.size(); i++)
+        cout << BitsetToChar(Decrypt(Encrypt(convertTexttoBit(preparatedText[i]), key), key)) << endl;*/
 
 }
